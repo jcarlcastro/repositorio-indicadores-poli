@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Repositorio de Indicadores · Politécnico Grancolombiano</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#080c18;--bg2:#0c1120;--bg3:#101828;--card:#0f1624;--card2:#151e30;
+  --gold:#f5a623;--gold2:#ffc85a;--gold3:rgba(245,166,35,0.1);
+  --text:#e8edf5;--text2:#7b8aaa;--text3:#4a556e;
+  --border:rgba(245,166,35,0.1);--border2:rgba(255,255,255,0.05);
+  --green:#22c55e;--red:#f43f5e;--amber:#f59e0b;--blue:#3b82f6;--teal:#14b8a6;--purple:#a78bfa;
+  --green-bg:rgba(34,197,94,0.08);--red-bg:rgba(244,63,94,0.08);--amber-bg:rgba(245,158,11,0.08);
+  --blue-bg:rgba(59,130,246,0.08);--teal-bg:rgba(20,184,166,0.08);--purple-bg:rgba(167,139,250,0.08);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;overflow-x:hidden;}
+body::before{
+  content:'';position:fixed;inset:0;
+  background:
+    radial-gradient(ellipse 70% 40% at 0% 0%,rgba(245,166,35,0.05) 0%,transparent 60%),
+    radial-gradient(ellipse 50% 35% at 100% 90%,rgba(59,130,246,0.06) 0%,transparent 55%),
+    linear-gradient(rgba(255,255,255,0.018) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,0.018) 1px,transparent 1px);
+  background-size:100% 100%,100% 100%,52px 52px,52px 52px;
+  pointer-events:none;z-index:0;
+}
+.wrap{position:relative;z-index:1;max-width:1480px;margin:0 auto;padding:0 28px 72px;}
+
+/* TOPBAR */
+.topbar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:22px 0 20px;border-bottom:1px solid var(--border);
+  animation:fadeDown .5s ease both;
+}
+.brand{display:flex;align-items:center;gap:14px;}
+.badge{
+  width:42px;height:42px;border-radius:10px;
+  background:linear-gradient(135deg,var(--gold),#a86800);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Syne',sans-serif;font-weight:800;font-size:15px;color:#080c18;
+  box-shadow:0 0 20px rgba(245,166,35,0.3);
+}
+.brand-text h1{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;color:var(--text);}
+.brand-text p{font-size:11px;color:var(--text2);letter-spacing:.06em;text-transform:uppercase;margin-top:2px;}
+.topbar-right{display:flex;align-items:center;gap:16px;}
+.search-wrap{position:relative;}
+.search-wrap input{
+  background:var(--card2);border:1px solid var(--border2);
+  color:var(--text);border-radius:10px;padding:9px 14px 9px 36px;
+  font-family:'DM Sans',sans-serif;font-size:13px;outline:none;width:210px;
+  transition:border-color .2s,width .3s;
+}
+.search-wrap input:focus{border-color:var(--gold);width:250px;}
+.search-wrap input::placeholder{color:var(--text3);}
+.search-icon{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--text3);font-size:14px;pointer-events:none;}
+.btn-export-all{
+  background:transparent;border:1px solid var(--border);
+  color:var(--gold);padding:9px 18px;border-radius:10px;
+  font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;
+  cursor:pointer;transition:all .2s;white-space:nowrap;
+}
+.btn-export-all:hover{background:var(--gold3);border-color:var(--gold);}
+
+/* HERO */
+.hero{padding:44px 0 36px;animation:fadeUp .5s ease .05s both;}
+.hero-tag{
+  display:inline-flex;align-items:center;gap:8px;
+  background:var(--gold3);border:1px solid var(--border);
+  border-radius:100px;padding:5px 14px;margin-bottom:16px;
+  font-size:11px;color:var(--gold);letter-spacing:.07em;text-transform:uppercase;font-weight:600;
+}
+.pulse{width:6px;height:6px;border-radius:50%;background:var(--gold);animation:pulse 2s infinite;}
+.hero h2{
+  font-family:'Syne',sans-serif;font-size:clamp(26px,3.5vw,42px);font-weight:800;
+  color:var(--text);line-height:1.08;letter-spacing:-.02em;margin-bottom:12px;
+}
+.hero h2 em{color:var(--gold);font-style:normal;}
+.hero p{font-size:14px;color:var(--text2);line-height:1.7;max-width:540px;margin-bottom:28px;}
+.hero-counts{display:flex;gap:32px;flex-wrap:wrap;}
+.hcount .n{font-family:'Syne',sans-serif;font-size:26px;font-weight:800;color:var(--text);line-height:1;}
+.hcount .n em{font-size:13px;font-style:normal;color:var(--gold);}
+.hcount .s{font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:.07em;margin-top:4px;}
+
+/* SUMMARY STRIP */
+.summary{
+  display:grid;grid-template-columns:repeat(4,1fr);gap:14px;
+  margin-bottom:36px;animation:fadeUp .5s ease .1s both;
+}
+@media(max-width:900px){.summary{grid-template-columns:repeat(2,1fr);}}
+.scard{
+  background:var(--card);border:1px solid var(--border2);border-radius:14px;
+  padding:18px 20px;display:flex;align-items:center;gap:12px;
+  transition:border-color .2s;
+}
+.scard:hover{border-color:var(--border);}
+.sicon{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+.scard .lbl{font-size:10px;color:var(--text2);text-transform:uppercase;letter-spacing:.07em;margin-bottom:3px;}
+.scard .val{font-family:'Syne',sans-serif;font-size:19px;font-weight:700;color:var(--text);line-height:1;}
+.scard .sub{font-size:11px;margin-top:3px;}
+
+/* CONTROLS */
+.controls{
+  display:flex;align-items:center;justify-content:space-between;
+  flex-wrap:wrap;gap:12px;margin-bottom:20px;
+  animation:fadeUp .5s ease .15s both;
+}
+.pills{display:flex;gap:8px;flex-wrap:wrap;}
+.pill{
+  background:var(--card2);border:1px solid var(--border2);
+  color:var(--text2);padding:7px 16px;border-radius:100px;
+  font-size:12px;font-weight:500;cursor:pointer;transition:all .2s;
+}
+.pill:hover{border-color:var(--gold);color:var(--gold);}
+.pill.active{background:var(--gold3);border-color:var(--gold);color:var(--gold);}
+.pill-sga{--pc:var(--teal);--pbg:var(--teal-bg);}
+.pill-sgc{--pc:var(--purple);--pbg:var(--purple-bg);}
+.pill-fin{--pc:var(--green);--pbg:var(--green-bg);}
+.pill-aca{--pc:var(--blue);--pbg:var(--blue-bg);}
+.pill.active.pill-sga{background:var(--pbg);border-color:var(--teal);color:var(--teal);}
+.pill.active.pill-sgc{background:var(--pbg);border-color:var(--purple);color:var(--purple);}
+.pill.active.pill-fin{background:var(--pbg);border-color:var(--green);color:var(--green);}
+.pill.active.pill-aca{background:var(--pbg);border-color:var(--blue);color:var(--blue);}
+
+/* CARDS GRID */
+.grid{
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));
+  gap:16px;animation:fadeUp .5s ease .2s both;
+}
+.ind-card{
+  background:var(--card);border:1px solid var(--border2);border-radius:18px;
+  overflow:hidden;cursor:pointer;
+  transition:transform .25s,box-shadow .25s,border-color .25s;
+  position:relative;display:flex;flex-direction:column;
+  text-decoration:none;
+}
+.ind-card:hover{transform:translateY(-4px);box-shadow:0 16px 48px rgba(0,0,0,.4);border-color:rgba(255,255,255,.1);}
+.ind-card.hidden{display:none;}
+.accent{height:3px;position:absolute;top:0;left:0;right:0;}
+
+.card-head{padding:20px 20px 14px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;}
+.cicon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:19px;flex-shrink:0;}
+.cmeta{flex:1;min-width:0;}
+.ccat{font-size:10px;text-transform:uppercase;letter-spacing:.08em;font-weight:600;margin-bottom:4px;}
+.ctitle{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;color:var(--text);line-height:1.3;}
+.cbadge{padding:4px 10px;border-radius:100px;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;flex-shrink:0;white-space:nowrap;}
+
+.card-kpis{padding:0 20px 16px;display:flex;gap:14px;flex-wrap:wrap;}
+.ck .cl{font-size:10px;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px;}
+.ck .cv{font-family:'Syne',sans-serif;font-size:16px;font-weight:700;color:var(--text);line-height:1;}
+.ck .cu{font-size:10px;color:var(--text2);}
+
+.card-footer{
+  margin-top:auto;padding:12px 20px;
+  border-top:1px solid var(--border2);
+  display:flex;align-items:center;justify-content:space-between;
+}
+.cfooter-left{font-size:11px;color:var(--text3);}
+.cfooter-right{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text2);}
+.cfooter-right .arrow{font-size:14px;}
+
+/* Progress bar */
+.progress-wrap{padding:0 20px 16px;}
+.progress-label{display:flex;justify-content:space-between;margin-bottom:6px;}
+.progress-label span{font-size:10px;color:var(--text2);}
+.progress-label .pct{font-family:'Syne',sans-serif;font-size:11px;font-weight:700;}
+.progress-track{height:4px;background:rgba(255,255,255,.06);border-radius:2px;overflow:hidden;}
+.progress-fill{height:100%;border-radius:2px;transition:width .6s ease;}
+
+/* Category colors */
+.c-sga  {--cc:var(--teal); --cbg:var(--teal-bg);}
+.c-sgc  {--cc:var(--purple);--cbg:var(--purple-bg);}
+.c-fin  {--cc:var(--green); --cbg:var(--green-bg);}
+.c-aca  {--cc:var(--blue);  --cbg:var(--blue-bg);}
+
+/* Status */
+.status-ok    {color:var(--green);}
+.status-warn  {color:var(--amber);}
+.status-alert {color:var(--red);}
+.bg-ok        {background:var(--green-bg);color:var(--green);}
+.bg-warn      {background:var(--amber-bg);color:var(--amber);}
+.bg-alert     {background:var(--red-bg);color:var(--red);}
+.bg-neutral   {background:rgba(255,255,255,.05);color:var(--text2);}
+
+/* MODAL */
+.overlay{
+  display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);
+  z-index:100;align-items:center;justify-content:center;padding:20px;
+  backdrop-filter:blur(4px);
+}
+.overlay.open{display:flex;}
+.modal{
+  background:var(--bg2);border:1px solid var(--border2);border-radius:20px;
+  width:100%;max-width:680px;max-height:90vh;overflow-y:auto;
+  animation:fadeUp .3s ease both;
+}
+.modal-head{
+  padding:24px 28px 18px;border-bottom:1px solid var(--border2);
+  display:flex;align-items:flex-start;justify-content:space-between;gap:16px;
+}
+.modal-title{font-family:'Syne',sans-serif;font-size:18px;font-weight:700;color:var(--text);}
+.modal-sub{font-size:12px;color:var(--text2);margin-top:4px;}
+.btn-close{
+  background:rgba(255,255,255,.05);border:1px solid var(--border2);
+  color:var(--text2);width:34px;height:34px;border-radius:8px;
+  font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;
+  transition:all .2s;flex-shrink:0;
+}
+.btn-close:hover{background:rgba(255,255,255,.1);color:var(--text);}
+.modal-body{padding:24px 28px;}
+.modal-kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:22px;}
+.mk{background:var(--card);border:1px solid var(--border2);border-radius:12px;padding:14px 16px;}
+.mk .ml{font-size:10px;color:var(--text2);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px;}
+.mk .mv{font-family:'Syne',sans-serif;font-size:20px;font-weight:700;color:var(--text);}
+.mk .mu{font-size:11px;color:var(--text2);}
+.modal-btn{
+  display:block;width:100%;padding:13px;
+  background:linear-gradient(135deg,var(--gold),#a86800);
+  color:#080c18;border:none;border-radius:12px;
+  font-family:'DM Sans',sans-serif;font-size:14px;font-weight:700;
+  cursor:pointer;text-align:center;transition:opacity .2s;text-decoration:none;
+  margin-bottom:10px;
+}
+.modal-btn:hover{opacity:.88;}
+.modal-btn.secondary{background:transparent;border:1px solid var(--border);color:var(--gold);}
+.modal-btn.secondary:hover{background:var(--gold3);}
+.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px;}
+.irow{display:flex;flex-direction:column;gap:3px;}
+.irow .il{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.07em;}
+.irow .iv{font-size:13px;color:var(--text);}
+.sedes-chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:22px;}
+.chip{padding:5px 12px;border-radius:100px;font-size:11px;font-weight:600;
+  background:rgba(255,255,255,.05);border:1px solid var(--border2);color:var(--text2);}
+.chip.active-sede{background:var(--teal-bg);border-color:var(--teal);color:var(--teal);}
+
+/* Empty state */
+.empty{
+  grid-column:1/-1;text-align:center;padding:80px 20px;
+  color:var(--text3);font-size:14px;
+}
+.empty .e-icon{font-size:40px;margin-bottom:16px;opacity:.4;}
+
+/* Animations */
+@keyframes fadeDown{from{opacity:0;transform:translateY(-12px)}to{opacity:1;transform:none}}
+@keyframes fadeUp  {from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:none}}
+@keyframes pulse   {0%,100%{opacity:1}50%{opacity:.4}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- TOPBAR -->
+  <header class="topbar">
+    <div class="brand">
+      <div class="badge">PG</div>
+      <div class="brand-text">
+        <h1>Politécnico Grancolombiano</h1>
+        <p>Repositorio de Indicadores Institucionales</p>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <div class="search-wrap">
+        <span class="search-icon">⌕</span>
+        <input type="text" id="searchInput" placeholder="Buscar indicador…" oninput="filterCards()">
+      </div>
+      <button class="btn-export-all" onclick="exportResumen()">↓ Exportar resumen</button>
+    </div>
+  </header>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-tag"><span class="pulse"></span>Sistema activo · 2025</div>
+    <h2>Repositorio de<br><em>Indicadores Institucionales</em></h2>
+    <p>Panel centralizado de todos los indicadores del Poli. Los datos se actualizan automáticamente desde los archivos Excel en OneDrive. Selecciona cualquier indicador para ver el detalle.</p>
+    <div class="hero-counts">
+      <div class="hcount"><div class="n" id="cnt-total">17</div><div class="s">Indicadores totales</div></div>
+      <div class="hcount"><div class="n">4<em>cat</em></div><div class="s">Categorías</div></div>
+      <div class="hcount"><div class="n">2<em>sedes</em></div><div class="s">Bogotá · Medellín</div></div>
+      <div class="hcount"><div class="n" id="cnt-ok" style="color:var(--green)">—</div><div class="s">En meta</div></div>
+    </div>
+  </section>
+
+  <!-- SUMMARY STRIP -->
+  <div class="summary">
+    <div class="scard">
+      <div class="sicon" style="background:var(--teal-bg)">🌿</div>
+      <div><div class="lbl">SGA · Ambientales</div><div class="val">6</div><div class="sub" style="color:var(--teal)">indicadores activos</div></div>
+    </div>
+    <div class="scard">
+      <div class="sicon" style="background:var(--purple-bg)">✅</div>
+      <div><div class="lbl">SGC · Calidad</div><div class="val">5</div><div class="sub" style="color:var(--purple)">indicadores activos</div></div>
+    </div>
+    <div class="scard">
+      <div class="sicon" style="background:var(--green-bg)">💰</div>
+      <div><div class="lbl">Financieros</div><div class="val">3</div><div class="sub" style="color:var(--green)">indicadores activos</div></div>
+    </div>
+    <div class="scard">
+      <div class="sicon" style="background:var(--blue-bg)">🎓</div>
+      <div><div class="lbl">Académicos</div><div class="val">3</div><div class="sub" style="color:var(--blue)">indicadores activos</div></div>
+    </div>
+  </div>
+
+  <!-- CONTROLS -->
+  <div class="controls">
+    <div class="pills">
+      <button class="pill active" onclick="filterCat('all',this)">Todos</button>
+      <button class="pill pill-sga" onclick="filterCat('sga',this)">🌿 SGA · Ambiental</button>
+      <button class="pill pill-sgc" onclick="filterCat('sgc',this)">✅ SGC · Calidad</button>
+      <button class="pill pill-fin" onclick="filterCat('fin',this)">💰 Financiero</button>
+      <button class="pill pill-aca" onclick="filterCat('aca',this)">🎓 Académico</button>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <span style="font-size:12px;color:var(--text3)">Sede:</span>
+      <button class="pill active" id="pill-bogota" onclick="filterSede('bogota',this)">Bogotá</button>
+      <button class="pill active" id="pill-medellin" onclick="filterSede('medellin',this)">Medellín</button>
+    </div>
+  </div>
+
+  <!-- CARDS GRID -->
+  <div class="grid" id="cardsGrid"></div>
+
+</div>
+
+<!-- MODAL -->
+<div class="overlay" id="overlay" onclick="closeModal(event)">
+  <div class="modal" id="modal">
+    <div class="modal-head">
+      <div>
+        <div class="modal-title" id="modal-title">—</div>
+        <div class="modal-sub" id="modal-sub">—</div>
+      </div>
+      <button class="btn-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+  </div>
+</div>
+
+<script>
+// ─── DATOS ─────────────────────────────────────────────────────
+// INSTRUCCIÓN: para agregar un indicador nuevo, copie un objeto de esta lista
+// y modifique sus valores. El dashboard se actualizará automáticamente.
+// El campo "onedrive" debe ser la URL del Excel en OneDrive (compartir → copiar vínculo).
+
+const INDICATORS = [
+  // ── SGA ──────────────────────────────────────────────────────
+  {
+    id:"sga-energia", cat:"sga", label:"SGA · Ambiental",
+    title:"Energía Eléctrica", icon:"⚡", unit:"kWh",
+    code:"SGA-ENE-001",
+    sedes:["bogota","medellin"],
+    valor:2318450, meta:2500000,
+    actualizado:"Mar 2025",
+    responsable:"Gerencia de Planeación",
+    normativa:"ISO 14001:2015",
+    onedrive:"https://poligran.sharepoint.com/:x:/s/GestinAmbiental963/IQDFMs94RVhwSp3oULubgFBDAV3LruteIIgYhMtdGuekzDI?e=hYMxmS",
+    dashboard:"dashboard_energia.html",
+  },
+  {
+    id:"sga-agua", cat:"sga", label:"SGA · Ambiental",
+    title:"Consumo de Agua", icon:"💧", unit:"m³",
+    code:"SGA-AGU-001",
+    sedes:["bogota","medellin"],
+    valor:18240, meta:20000,
+    actualizado:"Mar 2025",
+    responsable:"Gerencia de Planeación",
+    normativa:"ISO 14001:2015",
+    onedrive:"REEMPLAZAR_CON_URL_EXCEL_AGUA",
+    dashboard:"dashboard_agua.html",
+  },
+  {
+    id:"sga-residuos", cat:"sga", label:"SGA · Ambiental",
+    title:"Residuos Sólidos", icon:"♻️", unit:"kg",
+    code:"SGA-RES-001",
+    sedes:["bogota","medellin"],
+    valor:12750, meta:15000,
+    actualizado:"Mar 2025",
+    responsable:"Gerencia de Planeación",
+    normativa:"ISO 14001:2015",
+    onedrive:"REEMPLAZAR_CON_URL_EXCEL_RESIDUOS",
+    dashboard:"dashboard_residuos.html",
+  },
+  {
+    id:"sga-respel", cat:"sga", label:"SGA · Ambiental",
+    title:"Residuos Peligrosos (RESPEL)", icon:"⚠️", unit:"kg",
+    code:"SGA-RPE-001",
+    sedes:["bogota"],
+    valor:84.2, meta:100,
+    actualizado:"Feb 2025",
+    responsable:"Gerencia de Planeación",
+    normativa:"Decreto 4741 / ISO 14001",
+    onedrive:"REEMPLAZAR_CON_URL_EXCEL_RESPEL",
+    dashboard:"dashboard_respel.html",
+  },
+  {
+    id:"sga-gei", cat:"sga", label:"SGA · Ambiental",
+    title:"GEI · Huella de Carbono", icon:"🌡️", unit:"tCO₂eq",
+    code:"SGA-GEI-001",
+    sedes:["bogota","medellin"],
+    valor:420.5, meta:500,
+    actualizado:"Dic 2024",
+    responsable:"Gerencia de Planeación",
+    normativa:"ISO 14064 / GHG Protocol",
+    onedrive:"REEMPLAZAR_CON_URL_EXCEL_GEI",
+    dashboard:"dashboard_gei.html",
+  },
+  {
+    id:"sga-flora", cat:"sga", label:"SGA · Ambiental",
+    title:"Flora y Suelo", icon:"🌱", unit:"m²",
+    code:"SGA-FLO-001",
+    sedes:["bogota"],
+    valor:1240, meta:1200,
+    actualizado:"Dic 2024",
+    responsable:"Gerencia de Planeación",
+    normativa:"ISO 14001:2015",
+    onedrive:"REEMPLAZAR_CON_URL_EXCEL_FLORA",
+    dashboard:"dashboard_flora.html",
+  },
+  // ── SGC ──────────────────────────────────────────────────────
+  {
+    id:"sgc-nc", cat:"sgc", label:"SGC · Calidad",
+    title:"No Conformidades", icon:"📋", unit:"NC",
+    code:"SGC-NC-001",
+    sedes:["bogota","medellin"],
+    valor:14, meta:20,
+    actualizado:"Mar 2025",
+    responsable:"Gerencia de Planeación",
+    normativa:"ISO 9001:2015",
+    onedrive:"REEMPLAZAR_CON_URL_EXCEL_NC",
+    dashboard:"dashboard_nc.html",
+  },
+  {
+    id:"sgc-sati", cat:"sgc", label:"SGC · Calidad",
+    title:"Satisfacción del Estudiante", icon:"😊", unit:"%",
+    code:"SGC-SAT-001",
+    sedes:["bogota","medellin"],
+    valor:87.4, meta:85,
+    actualizado:"Feb 2025",
+    responsable:"Gerencia de Planeación",
+    normativa:"ISO 9001:2015",
+    onedrive:"REEMPLAZAR_CON_URL_EXCEL_SATISFACCION",
+    dashboard:"dashboard_satisfaccion.html",
+  },
+  {
+    id:"sgc-audit", cat:"sgc", label:"SGC · Calidad",
+    title:"Auditorías Internas", icon:"🔍", unit:"auditorías",
+    code:"SGC-AUD-001",
+    sedes:["bogota","medellin"],
+    valor:8, meta:10,
+    actualizado:"Mar 2025",
+    responsable:"Gerencia de Planeación",
+    normativa:"ISO 9001:2015",
+    onedrive:"REEMPLAZAR_CON_URL_EXCEL_AUDITORIAS",
+    dashboard:"dashboard_auditorias.html",
+  },
+  {
+    id:"sgc-mej", cat:"sgc", label:"SGC · Calidad",
+    title:"Acciones de Mejora", icon:"🔧", unit:"acciones",
+    code:"SGC-MEJ-001",
+    sedes:["bogota","medellin"],
+    valor:22, meta:25,
+    actualizado:"Mar 2025",
+    responsable:"Gerencia de Planeación",
+    normativa:"ISO 9001:2015",
+    onedrive:"REEMPLAZAR_CON_URL_EXCEL_MEJORAS",
+    dashboard:"dashboard_mejoras.html",
+  },
+  {
+    id:"sgc-pqrs", cat:"sgc", label:"SGC · Calidad",
+    title:"PQRS Resueltas", icon:"📩", unit:"%",
+    code:"SGC-PQR-001",
+    sedes:["bogota","medellin"],
+    valor:94.1, meta:90,
+    actualizado:"Mar 2025",
+    responsable:"Gerencia de Planeación",
+    normativa:"ISO 9001:2015",
+    onedrive:"REEMPLAZAR_CON_URL_EXCEL_PQRS",
+    dashboard:"dashboard_pqrs.html",
+  },
+  // ── FINANCIERO ───────────────────────────────────────────────
+  {
+    id:"fin-ejec", cat:"fin", label:"Financiero",
+    title:"Ejecución Presupuestal", icon:"💼", unit:"%",
+    code:"FIN-EJE-001",
+    sedes:["bogota","medellin"],
+    valor:72.3, meta:80,
+    actualizado:"Mar 2025",
+    responsable:"Dirección Financiera",
+    normativa:"Plan de Acción Institucional",
+    onedrive:"REEMPLAZAR_CON_URL_EXCEL_PRESUPUESTO",
+    dashboard:"dashboard_presupuesto.html",
+  },
+  {
+    id:"fin-inv", cat:"fin", label:"Financiero",
+    title:"Inversión en Formación", icon:"📚", unit:"COP",
+    code:"FIN-INV-001",
+    sedes:["bogota","medellin"],
+    valor:280000000, meta:300000000,
+    actualizado:"Feb 2025",
+    responsable:"Dirección Financiera",
+    normativa:"Plan de Acción Institucional",
+    onedrive:"REEMPLAZAR_CON_URL_EXCEL_INVERSION",
+    dashboard:"dashboard_inversion.html",
+  },
+  {
+    id:"fin-cos", cat:"fin", label:"Financiero",
+    title:"Costo por Estudiante", icon:"🧾", unit:"COP",
+    code:"FIN-COS-001",
+    sedes:["bogota","medellin"],
+    valor:4250000, meta:4500000,
+    actualizado:"Ene 2025",
+    responsable:"Dirección Financiera",
+    normativa:"Plan de Acción Institucional",
+    onedrive:"REEMPLAZAR_CON_URL_EXCEL_COSTOS",
+    dashboard:"dashboard_costos.html",
+  },
+  // ── ACADÉMICO ────────────────────────────────────────────────
+  {
+    id:"aca-mat", cat:"aca", label:"Académico",
+    title:"Matriculados Activos", icon:"🎓", unit:"estudiantes",
+    code:"ACA-MAT-001",
+    sedes:["bogota","medellin"],
+    valor:18420, meta:19000,
+    actualizado:"Mar 2025",
+    responsable:"Vicerrectoría Académica",
+    normativa:"Plan de Desarrollo Institucional",
+    onedrive:"REEMPLAZAR_CON_URL_EXCEL_MATRICULADOS",
+    dashboard:"dashboard_matriculados.html",
+  },
+  {
+    id:"aca-ret", cat:"aca", label:"Académico",
+    title:"Tasa de Retención", icon:"📎", unit:"%",
+    code:"ACA-RET-001",
+    sedes:["bogota","medellin"],
+    valor:81.2, meta:83,
+    actualizado:"Feb 2025",
+    responsable:"Vicerrectoría Académica",
+    normativa:"SPADIES / MEN",
+    onedrive:"REEMPLAZAR_CON_URL_EXCEL_RETENCION",
+    dashboard:"dashboard_retencion.html",
+  },
+  {
+    id:"aca-grad", cat:"aca", label:"Académico",
+    title:"Graduados por Año", icon:"🏆", unit:"graduados",
+    code:"ACA-GRA-001",
+    sedes:["bogota","medellin"],
+    valor:2840, meta:3000,
+    actualizado:"Dic 2024",
+    responsable:"Vicerrectoría Académica",
+    normativa:"Plan de Desarrollo Institucional",
+    onedrive:"REEMPLAZAR_CON_URL_EXCEL_GRADUADOS",
+    dashboard:"dashboard_graduados.html",
+  },
+];
+
+// ─── ESTADO ────────────────────────────────────────────────────
+let activeCat  = 'all';
+let activeSedes = new Set(['bogota','medellin']);
+let searchTerm = '';
+
+// ─── HELPERS ──────────────────────────────────────────────────
+const CAT_COLOR = {sga:'--teal',sgc:'--purple',fin:'--green',aca:'--blue'};
+const CAT_BG    = {sga:'--teal-bg',sgc:'--purple-bg',fin:'--green-bg',aca:'--blue-bg'};
+
+function pct(v,m){return m>0?Math.min((v/m)*100,150):0;}
+function fmt(v,u){
+  if(u==='COP') return new Intl.NumberFormat('es-CO',{style:'currency',currency:'COP',maximumFractionDigits:0}).format(v);
+  if(v>=1000000) return (v/1000000).toFixed(1)+'M';
+  if(v>=1000)    return (v/1000).toFixed(1)+'k';
+  return v.toLocaleString('es-CO');
+}
+function statusClass(p){
+  if(p>=100) return 'status-ok';
+  if(p>=80)  return 'status-warn';
+  return 'status-alert';
+}
+function badgeClass(p){
+  if(p>=100) return 'bg-ok';
+  if(p>=80)  return 'bg-warn';
+  return 'bg-alert';
+}
+function badgeLabel(p){
+  if(p>=100) return '✓ En meta';
+  if(p>=80)  return '↗ Cercano';
+  return '↘ Por debajo';
+}
+
+// ─── RENDER CARDS ─────────────────────────────────────────────
+function renderCards(){
+  const grid = document.getElementById('cardsGrid');
+  const catColor = (cat) => `var(${CAT_COLOR[cat]})`;
+  const catBg    = (cat) => `var(${CAT_BG[cat]})`;
+
+  const visible = INDICATORS.filter(ind => {
+    const matchCat  = activeCat === 'all' || ind.cat === activeCat;
+    const matchSede = ind.sedes.some(s => activeSedes.has(s));
+    const matchSrch = !searchTerm || ind.title.toLowerCase().includes(searchTerm) || ind.code.toLowerCase().includes(searchTerm);
+    return matchCat && matchSede && matchSrch;
+  });
+
+  const okCount = visible.filter(i => pct(i.valor,i.meta) >= 100).length;
+  document.getElementById('cnt-total').textContent = visible.length;
+  document.getElementById('cnt-ok').textContent = okCount;
+
+  if(visible.length === 0){
+    grid.innerHTML = `<div class="empty"><div class="e-icon">🔍</div>No se encontraron indicadores con los filtros seleccionados.</div>`;
+    return;
+  }
+
+  grid.innerHTML = visible.map(ind => {
+    const p = pct(ind.valor, ind.meta);
+    const cc = catColor(ind.cat);
+    const cb = catBg(ind.cat);
+    const gradColor = p >= 100 ? 'var(--green)' : p >= 80 ? 'var(--amber)' : 'var(--red)';
+    const sedesBadges = ind.sedes.map(s => `<span class="chip active-sede">${s==='bogota'?'🏙 Bogotá':'🌆 Medellín'}</span>`).join('');
+
+    return `
+    <div class="ind-card c-${ind.cat}" onclick="openModal('${ind.id}')" title="Ver detalle: ${ind.title}">
+      <div class="accent" style="background:linear-gradient(90deg,${cc},transparent)"></div>
+      <div class="card-head">
+        <div class="cicon" style="background:${cb};">${ind.icon}</div>
+        <div class="cmeta">
+          <div class="ccat" style="color:${cc}">${ind.label} · ${ind.code}</div>
+          <div class="ctitle">${ind.title}</div>
+        </div>
+        <span class="cbadge ${badgeClass(p)}">${badgeLabel(p)}</span>
+      </div>
+      <div class="card-kpis">
+        <div class="ck">
+          <div class="cl">Valor actual</div>
+          <div class="cv">${fmt(ind.valor,ind.unit)}</div>
+          <div class="cu">${ind.unit}</div>
+        </div>
+        <div class="ck">
+          <div class="cl">Meta anual</div>
+          <div class="cv">${fmt(ind.meta,ind.unit)}</div>
+          <div class="cu">${ind.unit}</div>
+        </div>
+        <div class="ck">
+          <div class="cl">Cumplimiento</div>
+          <div class="cv ${statusClass(p)}">${p.toFixed(1)}%</div>
+        </div>
+      </div>
+      <div class="progress-wrap">
+        <div class="progress-label">
+          <span>Avance vs meta</span>
+          <span class="pct ${statusClass(p)}">${p.toFixed(1)}%</span>
+        </div>
+        <div class="progress-track">
+          <div class="progress-fill" style="width:${Math.min(p,100)}%;background:${gradColor}"></div>
+        </div>
+      </div>
+      <div class="card-footer">
+        <span class="cfooter-left">Actualizado: ${ind.actualizado}</span>
+        <div class="cfooter-right">Ver dashboard <span class="arrow">→</span></div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ─── FILTROS ──────────────────────────────────────────────────
+function filterCat(cat, btn){
+  activeCat = cat;
+  document.querySelectorAll('.pills .pill').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  renderCards();
+}
+
+function filterSede(sede, btn){
+  if(activeSedes.has(sede)){
+    if(activeSedes.size > 1) { activeSedes.delete(sede); btn.classList.remove('active'); }
+  } else {
+    activeSedes.add(sede); btn.classList.add('active');
+  }
+  renderCards();
+}
+
+function filterCards(){
+  searchTerm = document.getElementById('searchInput').value.toLowerCase();
+  renderCards();
+}
+
+// ─── MODAL ────────────────────────────────────────────────────
+function openModal(id){
+  const ind = INDICATORS.find(i => i.id === id);
+  if(!ind) return;
+  const p = pct(ind.valor, ind.meta);
+  const gradColor = p>=100?'var(--green)':p>=80?'var(--amber)':'var(--red)';
+  const cc = `var(${CAT_COLOR[ind.cat]})`;
+
+  document.getElementById('modal-title').textContent = ind.title;
+  document.getElementById('modal-sub').textContent = `${ind.code} · ${ind.label} · Responsable: ${ind.responsable}`;
+
+  const sedesBadges = ind.sedes.map(s =>
+    `<span class="chip active-sede">${s==='bogota'?'🏙 Bogotá':'🌆 Medellín'}</span>`
+  ).join('');
+
+  document.getElementById('modal-body').innerHTML = `
+    <div class="modal-kpis">
+      <div class="mk">
+        <div class="ml">Valor actual</div>
+        <div class="mv">${fmt(ind.valor,ind.unit)}</div>
+        <div class="mu">${ind.unit}</div>
+      </div>
+      <div class="mk">
+        <div class="ml">Meta anual</div>
+        <div class="mv">${fmt(ind.meta,ind.unit)}</div>
+        <div class="mu">${ind.unit}</div>
+      </div>
+      <div class="mk">
+        <div class="ml">Cumplimiento</div>
+        <div class="mv" style="color:${gradColor}">${p.toFixed(1)}%</div>
+        <div class="mu ${badgeClass(p)}" style="display:inline-block;padding:2px 8px;border-radius:100px;font-size:10px;font-weight:600;margin-top:4px;">${badgeLabel(p)}</div>
+      </div>
+    </div>
+    <div class="progress-track" style="height:6px;margin-bottom:22px;">
+      <div class="progress-fill" style="width:${Math.min(p,100)}%;background:${gradColor};height:6px;border-radius:3px;"></div>
+    </div>
+    <div class="info-grid">
+      <div class="irow"><div class="il">Código</div><div class="iv">${ind.code}</div></div>
+      <div class="irow"><div class="il">Actualizado</div><div class="iv">${ind.actualizado}</div></div>
+      <div class="irow"><div class="il">Normativa</div><div class="iv">${ind.normativa}</div></div>
+      <div class="irow"><div class="il">Responsable</div><div class="iv">${ind.responsable}</div></div>
+    </div>
+    <div class="sedes-chips" style="margin-bottom:16px;">${sedesBadges}</div>
+    <a class="modal-btn" href="${ind.dashboard}" title="Abrir dashboard completo">📊 Ver dashboard completo</a>
+    <a class="modal-btn secondary" href="${ind.onedrive}" target="_blank" title="Abrir Excel en OneDrive">📁 Abrir Excel en OneDrive</a>
+  `;
+
+  document.getElementById('overlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal(e){
+  if(e && e.target !== document.getElementById('overlay')) return;
+  document.getElementById('overlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+// ─── EXPORT RESUMEN ───────────────────────────────────────────
+function exportResumen(){
+  const headers = ['Código','Indicador','Categoría','Valor','Unidad','Meta','% Cumplimiento','Estado','Actualizado','Sedes'];
+  const rows = INDICATORS.map(i => {
+    const p = pct(i.valor,i.meta);
+    return [i.code,i.title,i.label,i.valor,i.unit,i.meta,p.toFixed(1)+'%',badgeLabel(p),i.actualizado,i.sedes.join(' · ')];
+  });
+  const csv = [headers, ...rows].map(r => r.join(',')).join('\n');
+  const blob = new Blob(['\uFEFF'+csv], {type:'text/csv;charset=utf-8'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'resumen_indicadores_poli_2025.csv';
+  a.click();
+}
+
+// INIT
+renderCards();
+</script>
+</body>
+</html>
