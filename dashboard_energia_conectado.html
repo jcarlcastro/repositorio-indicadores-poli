@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Energía Eléctrica · Repositorio Indicadores Poli</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#080c18;--bg2:#0c1120;--bg3:#101828;--card:#0f1624;--card2:#151e30;
+  --gold:#f5a623;--gold2:#ffc85a;--gold3:rgba(245,166,35,0.1);
+  --text:#e8edf5;--text2:#7b8aaa;--text3:#4a556e;
+  --border:rgba(245,166,35,0.1);--border2:rgba(255,255,255,0.05);
+  --green:#22c55e;--red:#f43f5e;--amber:#f59e0b;--cyan:#38bdf8;
+  --green-bg:rgba(34,197,94,0.08);--red-bg:rgba(244,63,94,0.08);--amber-bg:rgba(245,158,11,0.08);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;overflow-x:hidden;}
+body::before{
+  content:'';position:fixed;inset:0;
+  background:
+    radial-gradient(ellipse 60% 35% at 0% 0%,rgba(245,166,35,0.05) 0%,transparent 60%),
+    linear-gradient(rgba(255,255,255,0.018) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,0.018) 1px,transparent 1px);
+  background-size:100% 100%,52px 52px,52px 52px;
+  pointer-events:none;z-index:0;
+}
+.wrap{position:relative;z-index:1;max-width:1440px;margin:0 auto;padding:0 24px 56px;}
+
+/* ── TOPBAR ── */
+.topbar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:20px 0 18px;border-bottom:1px solid var(--border);margin-bottom:0;
+  animation:fadeDown .5s ease both;
+}
+.back-btn{
+  display:flex;align-items:center;gap:8px;
+  background:transparent;border:1px solid var(--border2);
+  color:var(--text2);padding:8px 14px;border-radius:9px;
+  font-family:'DM Sans',sans-serif;font-size:12px;cursor:pointer;
+  text-decoration:none;transition:all .2s;
+}
+.back-btn:hover{border-color:var(--gold);color:var(--gold);}
+.topbar-center{text-align:center;}
+.topbar-center h1{font-family:'Syne',sans-serif;font-size:15px;font-weight:700;color:var(--text);}
+.topbar-center p{font-size:11px;color:var(--text2);margin-top:2px;}
+.topbar-right{display:flex;align-items:center;gap:10px;}
+.btn-reload{
+  background:transparent;border:1px solid var(--border2);
+  color:var(--text2);padding:8px 14px;border-radius:9px;
+  font-family:'DM Sans',sans-serif;font-size:12px;cursor:pointer;transition:all .2s;
+}
+.btn-reload:hover{border-color:var(--gold);color:var(--gold);}
+.btn-export{
+  background:linear-gradient(135deg,var(--gold),#a86800);
+  color:#080c18;border:none;padding:8px 18px;border-radius:9px;
+  font-family:'DM Sans',sans-serif;font-size:12px;font-weight:700;cursor:pointer;transition:opacity .2s;
+}
+.btn-export:hover{opacity:.88;}
+
+/* ── CONFIG BANNER ── */
+.config-banner{
+  background:linear-gradient(135deg,rgba(245,166,35,0.08),rgba(245,166,35,0.03));
+  border:1px solid var(--border);border-radius:14px;
+  padding:18px 22px;margin:24px 0;
+  display:flex;align-items:center;justify-content:space-between;gap:16px;
+  flex-wrap:wrap;
+  animation:fadeUp .5s ease .05s both;
+}
+.config-banner.connected{border-color:rgba(34,197,94,.3);background:rgba(34,197,94,.04);}
+.config-banner.error{border-color:rgba(244,63,94,.3);background:rgba(244,63,94,.04);}
+.config-left{display:flex;align-items:center;gap:12px;}
+.config-icon{width:36px;height:36px;border-radius:9px;background:var(--gold3);
+  display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+.config-title{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:var(--text);margin-bottom:3px;}
+.config-sub{font-size:11px;color:var(--text2);}
+.config-right{display:flex;align-items:center;gap:10px;}
+input.config-input{
+  background:var(--bg3);border:1px solid var(--border2);
+  color:var(--text);border-radius:8px;padding:8px 12px;
+  font-family:'DM Sans',sans-serif;font-size:12px;outline:none;
+  min-width:280px;transition:border-color .2s;
+}
+input.config-input:focus{border-color:var(--gold);}
+input.config-input::placeholder{color:var(--text3);}
+.btn-connect{
+  background:var(--gold3);border:1px solid var(--border);
+  color:var(--gold);padding:8px 16px;border-radius:8px;
+  font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer;
+  transition:all .2s;white-space:nowrap;
+}
+.btn-connect:hover{background:rgba(245,166,35,0.18);}
+
+/* ── FILTERS ── */
+.filters{
+  display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;
+  background:var(--card2);border:1px solid var(--border2);
+  border-radius:14px;padding:18px 22px;margin-bottom:24px;
+  animation:fadeUp .5s ease .1s both;
+}
+.fg{display:flex;flex-direction:column;gap:5px;}
+.fg label{font-size:10px;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;font-weight:500;}
+.fg select{
+  background:var(--bg3);border:1px solid var(--border2);
+  color:var(--text);border-radius:8px;padding:8px 12px;
+  font-family:'DM Sans',sans-serif;font-size:13px;outline:none;cursor:pointer;min-width:140px;
+  transition:border-color .2s;
+}
+.fg select:focus{border-color:var(--gold);}
+.fg select option{background:var(--bg3);}
+.btn-reset{
+  background:transparent;border:1px solid var(--border2);
+  color:var(--text2);padding:8px 16px;border-radius:8px;
+  font-family:'DM Sans',sans-serif;font-size:12px;cursor:pointer;
+  transition:all .2s;align-self:flex-end;
+}
+.btn-reset:hover{border-color:var(--gold);color:var(--gold);}
+
+/* ── KPIS ── */
+.kpis{
+  display:grid;grid-template-columns:repeat(5,1fr);gap:12px;
+  margin-bottom:22px;animation:fadeUp .5s ease .15s both;
+}
+@media(max-width:1100px){.kpis{grid-template-columns:repeat(3,1fr);}}
+@media(max-width:600px) {.kpis{grid-template-columns:repeat(2,1fr);}}
+.kpi{
+  background:var(--card);border:1px solid var(--border2);border-radius:13px;padding:17px 16px;
+  position:relative;overflow:hidden;transition:transform .2s,box-shadow .2s;
+}
+.kpi:hover{transform:translateY(-2px);box-shadow:0 8px 32px rgba(0,0,0,.3);}
+.kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--gold),transparent);}
+.kpi-icon{font-size:18px;margin-bottom:8px;}
+.kpi-label{font-size:10px;color:var(--text2);text-transform:uppercase;letter-spacing:.07em;margin-bottom:5px;}
+.kpi-value{font-family:'Syne',sans-serif;font-size:21px;font-weight:700;color:var(--text);line-height:1;}
+.kpi-value span{font-size:11px;font-weight:400;color:var(--text2);}
+.kpi-sub{font-size:11px;margin-top:5px;}
+.kpi-sub.ok{color:var(--green);}
+.kpi-sub.warn{color:var(--amber);}
+.kpi-sub.bad{color:var(--red);}
+
+/* ── CHARTS ── */
+.charts-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;animation:fadeUp .5s ease .2s both;}
+@media(max-width:900px){.charts-grid{grid-template-columns:1fr;}}
+.chart-card{background:var(--card);border:1px solid var(--border2);border-radius:15px;padding:20px;}
+.chart-card.full{grid-column:1/-1;}
+.chart-title{
+  font-family:'Syne',sans-serif;font-size:13px;font-weight:600;color:var(--text);
+  margin-bottom:3px;display:flex;align-items:center;gap:7px;
+}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--gold);display:inline-block;}
+.chart-sub{font-size:11px;color:var(--text2);margin-bottom:16px;}
+.canvas-wrap{position:relative;height:240px;}
+.canvas-wrap.tall{height:290px;}
+
+/* ── HEATMAP ── */
+.heatmap-wrap{overflow-x:auto;margin-top:8px;}
+.hm-table{width:100%;border-collapse:collapse;font-size:11px;}
+.hm-table th{
+  padding:7px 9px;text-align:center;color:var(--text2);
+  font-weight:500;white-space:nowrap;font-size:10px;text-transform:uppercase;letter-spacing:.04em;
+}
+.hm-table th.sede-th{text-align:left;min-width:170px;}
+.hm-table td{
+  padding:6px 7px;text-align:center;border-radius:4px;
+  font-size:11px;font-weight:500;transition:opacity .2s;cursor:default;
+}
+.hm-table td.sede-name{text-align:left;color:var(--text);font-size:11px;padding-left:0;background:transparent !important;}
+.hm-table tr:hover td{opacity:.8;}
+
+/* ── TABLE ── */
+.table-section{background:var(--card);border:1px solid var(--border2);border-radius:15px;padding:20px;margin-bottom:16px;animation:fadeUp .5s ease .3s both;}
+.table-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.data-table{width:100%;border-collapse:collapse;font-size:12px;}
+.data-table th{
+  padding:9px 11px;text-align:right;color:var(--text2);
+  font-weight:500;font-size:10px;text-transform:uppercase;letter-spacing:.05em;
+  border-bottom:1px solid var(--border2);cursor:pointer;transition:color .2s;
+}
+.data-table th:first-child{text-align:left;}
+.data-table th:hover,.data-table th.sorted{color:var(--gold);}
+.data-table td{
+  padding:10px 11px;text-align:right;border-bottom:1px solid rgba(255,255,255,.03);
+  font-size:12px;transition:background .15s;
+}
+.data-table td:first-child{text-align:left;color:var(--text);}
+.data-table tr:hover td{background:rgba(255,255,255,.02);}
+.data-table tr:last-child td{background:rgba(245,166,35,.05);color:var(--gold2);font-weight:700;border-top:1px solid var(--border);}
+.badge{display:inline-block;padding:3px 9px;border-radius:100px;font-size:10px;font-weight:600;}
+.ok{background:var(--green-bg);color:var(--green);}
+.over{background:var(--red-bg);color:var(--red);}
+.warn{background:var(--amber-bg);color:var(--amber);}
+
+/* ── LOADING ── */
+.loading-overlay{
+  position:fixed;inset:0;background:rgba(8,12,24,.85);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  z-index:200;backdrop-filter:blur(4px);transition:opacity .3s;
+}
+.loading-overlay.hidden{opacity:0;pointer-events:none;}
+.spinner{
+  width:40px;height:40px;border:3px solid var(--border2);
+  border-top-color:var(--gold);border-radius:50%;
+  animation:spin 1s linear infinite;margin-bottom:16px;
+}
+.loading-text{font-size:13px;color:var(--text2);}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes fadeDown{from{opacity:0;transform:translateY(-12px)}to{opacity:1;transform:none}}
+@keyframes fadeUp  {from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="spinner"></div>
+  <div class="loading-text" id="loadingText">Iniciando…</div>
+</div>
+
+<div class="wrap">
+
+  <!-- TOPBAR -->
+  <header class="topbar">
+    <a class="back-btn" href="hub_indicadores_poli.html">← Volver al Hub</a>
+    <div class="topbar-center">
+      <h1>⚡ Energía Eléctrica</h1>
+      <p>SGA-ENE-001 · Politécnico Grancolombiano · Bogotá y Medellín</p>
+    </div>
+    <div class="topbar-right">
+      <button class="btn-reload" onclick="loadData()">↺ Actualizar</button>
+      <button class="btn-export" onclick="exportCSV()">↓ Exportar CSV</button>
+    </div>
+  </header>
+
+  <!-- CONFIG BANNER -->
+  <div class="config-banner" id="configBanner">
+    <div class="config-left">
+      <div class="config-icon">📁</div>
+      <div>
+        <div class="config-title">Conectar con Excel en OneDrive</div>
+        <div class="config-sub">Pega la URL pública del Excel (Compartir → Cualquiera con el vínculo → Copiar)</div>
+      </div>
+    </div>
+    <div class="config-right">
+      <input class="config-input" type="text" id="excelUrl" placeholder="https://politecnicocolombiano-my.sharepoint.com/...">
+      <button class="btn-connect" onclick="connectExcel()">Conectar</button>
+    </div>
+  </div>
+
+  <!-- FILTERS -->
+  <div class="filters" id="filtersBar" style="display:none">
+    <div class="fg">
+      <label>Año</label>
+      <select id="selYear" onchange="update()">
+        <option value="2025">2025</option>
+        <option value="2024">2024</option>
+      </select>
+    </div>
+    <div class="fg">
+      <label>Sede</label>
+      <select id="selSede" onchange="update()">
+        <option value="all">Todas las sedes</option>
+        <option value="bogota_n">Bogotá · Campus Norte</option>
+        <option value="bogota_c">Bogotá · Campus Ciudad</option>
+        <option value="bogota_s">Bogotá · Campus Sur</option>
+        <option value="medellin">Medellín</option>
+      </select>
+    </div>
+    <div class="fg">
+      <label>Período</label>
+      <select id="selPeriod" onchange="update()">
+        <option value="all">Todo el año</option>
+        <option value="q1">Q1 · Ene–Mar</option>
+        <option value="q2">Q2 · Abr–Jun</option>
+        <option value="q3">Q3 · Jul–Sep</option>
+        <option value="q4">Q4 · Oct–Dic</option>
+      </select>
+    </div>
+    <button class="btn-reset" onclick="resetFilters()">↺ Restablecer</button>
+  </div>
+
+  <!-- KPIS -->
+  <div class="kpis" id="kpisRow">
+    <div class="kpi"><div class="kpi-icon">⚡</div><div class="kpi-label">Total acumulado</div><div class="kpi-value">—</div><div class="kpi-sub">kWh 2025</div></div>
+    <div class="kpi"><div class="kpi-icon">🎯</div><div class="kpi-label">Meta anual</div><div class="kpi-value">—</div><div class="kpi-sub">kWh objetivo</div></div>
+    <div class="kpi"><div class="kpi-icon">📊</div><div class="kpi-label">% vs meta</div><div class="kpi-value">—</div><div class="kpi-sub">—</div></div>
+    <div class="kpi"><div class="kpi-icon">📅</div><div class="kpi-label">Promedio mensual</div><div class="kpi-value">—</div><div class="kpi-sub">kWh / mes</div></div>
+    <div class="kpi"><div class="kpi-icon">🏢</div><div class="kpi-label">Mayor consumidor</div><div class="kpi-value" style="font-size:14px">—</div><div class="kpi-sub">sede con más consumo</div></div>
+  </div>
+
+  <!-- CHARTS -->
+  <div class="charts-grid">
+    <div class="chart-card full">
+      <div class="chart-title"><span class="dot"></span>Consumo mensual por sede (kWh)</div>
+      <div class="chart-sub">Línea apilada con meta mensual de referencia</div>
+      <div class="canvas-wrap tall"><canvas id="chartLinea"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title"><span class="dot"></span>Distribución por sede</div>
+      <div class="chart-sub">Participación acumulada en el período</div>
+      <div class="canvas-wrap"><canvas id="chartDonut"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title"><span class="dot"></span>Ranking de sedes</div>
+      <div class="chart-sub">Consumo real vs meta acumulada</div>
+      <div class="canvas-wrap"><canvas id="chartBar"></canvas></div>
+    </div>
+    <div class="chart-card full">
+      <div class="chart-title"><span class="dot"></span>Mapa de calor · consumo mensual (kWh)</div>
+      <div class="chart-sub">Intensidad de color = nivel de consumo relativo</div>
+      <div class="heatmap-wrap"><div id="heatmapWrap"></div></div>
+    </div>
+  </div>
+
+  <!-- TABLE -->
+  <div class="table-section">
+    <div class="table-header">
+      <div>
+        <div class="chart-title"><span class="dot"></span>Datos detallados</div>
+        <div class="chart-sub">Valores mensuales por sede · clic en encabezado para ordenar</div>
+      </div>
+    </div>
+    <table class="data-table">
+      <thead id="tableHead"></thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+  </div>
+
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════════════
+// CONFIGURACIÓN — MODIFICAR SEGÚN TU EXCEL
+// ══════════════════════════════════════════════════════════════
+const CONFIG = {
+  // Nombre de la hoja en el Excel que contiene los datos mensuales
+  sheetName: "📊 Datos_Mensuales",
+  // Rango de datos (filas 5 a 16 = 12 meses, columnas B a H)
+  dataRange: "B5:H16",
+  // Meta anual global en kWh (también se puede leer desde la hoja Metas_Anuales)
+  metaAnual: 2500000,
+  // Nombres de las sedes en el mismo orden que las columnas C-G del Excel
+  sedes: [
+    { id:"bogota_n", label:"Bgotá · N.Norte",  color:"#f5a623", meta: 700000 },
+    { id:"bogota_c", label:"Bgotá · Ciudad",   color:"#38bdf8", meta: 500000 },
+    { id:"bogota_s", label:"Bgotá · Sur",      color:"#a78bfa", meta: 400000 },
+    { id:"medellin", label:"Medellín",         color:"#22c55e", meta: 500000 },
+    { id:"otro",     label:"Sede adicional",   color:"#f43f5e", meta: 100000 },
+  ],
+};
+
+// ══════════════════════════════════════════════════════════════
+// DATOS DEMO (se reemplazan cuando se conecta el Excel real)
+// ══════════════════════════════════════════════════════════════
+const DEMO_DATA = [
+  // [mes_idx, bogota_n, bogota_c, bogota_s, medellin, otro]
+  [0, 198420, 142300, 98500, 125000, 12000],
+  [1, 185300, 138700, 92300, 118500, 10800],
+  [2, 201500, 148200, 103000, 132000, 13200],
+  [3, 0, 0, 0, 0, 0],
+  [4, 0, 0, 0, 0, 0],
+  [5, 0, 0, 0, 0, 0],
+  [6, 0, 0, 0, 0, 0],
+  [7, 0, 0, 0, 0, 0],
+  [8, 0, 0, 0, 0, 0],
+  [9, 0, 0, 0, 0, 0],
+  [10, 0, 0, 0, 0, 0],
+  [11, 0, 0, 0, 0, 0],
+];
+
+const MESES      = ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"];
+const MESES_FULL = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
+const QUARTER    = { q1:[0,1,2], q2:[3,4,5], q3:[6,7,8], q4:[9,10,11] };
+
+let rawData   = DEMO_DATA;
+let charts    = {};
+let sortCol   = -1;
+let sortAsc   = true;
+let connected = false;
+
+// ══════════════════════════════════════════════════════════════
+// CONEXIÓN CON EXCEL VÍA MICROSOFT GRAPH API
+// ══════════════════════════════════════════════════════════════
+async function connectExcel() {
+  const urlInput = document.getElementById('excelUrl').value.trim();
+  if (!urlInput) { alert('Por favor pega la URL del Excel primero.'); return; }
+
+  showLoading('Conectando con OneDrive…');
+
+  try {
+    // Paso 1: Convertir la URL de SharePoint a una URL de Graph API
+    // La URL pública de OneDrive tiene el formato:
+    // https://xxx.sharepoint.com/:x:/r/personal/.../NombreArchivo.xlsx?...
+    // Usamos el endpoint de Graph con la URL codificada en base64
+    const b64 = btoa(urlInput).replace(/\+/g,'-').replace(/\//g,'_').replace(/=/g,'');
+    const graphUrl = `https://graph.microsoft.com/v1.0/shares/u!${b64}/driveItem/workbook/worksheets('${encodeURIComponent(CONFIG.sheetName)}')/range(address='${CONFIG.dataRange}')`;
+
+    const resp = await fetch(graphUrl, {
+      headers: {
+        'Content-Type': 'application/json',
+        // NOTA PARA TI: Si el archivo requiere autenticación corporativa,
+        // necesitas obtener un token de Azure AD. Pide a TI que registre
+        // la app y proporcione el CLIENT_ID para hacer el flujo OAuth2.
+        // Por ahora funciona con archivos compartidos como "cualquiera con el vínculo".
+      }
+    });
+
+    if (!resp.ok) throw new Error(`Error ${resp.status}: ${resp.statusText}`);
+
+    const json = await resp.json();
+    rawData = parseGraphResponse(json);
+    connected = true;
+
+    document.getElementById('configBanner').className = 'config-banner connected';
+    document.getElementById('configBanner').innerHTML = `
+      <div class="config-left">
+        <div class="config-icon">✅</div>
+        <div>
+          <div class="config-title" style="color:var(--green)">Conectado con OneDrive</div>
+          <div class="config-sub">Datos cargados desde el Excel · Última sincronización: ${new Date().toLocaleString('es-CO')}</div>
+        </div>
+      </div>
+      <button class="btn-connect" onclick="reconnect()">Cambiar archivo</button>
+    `;
+
+  } catch(err) {
+    console.error('Error conectando:', err);
+    document.getElementById('configBanner').className = 'config-banner error';
+    document.getElementById('configBanner').querySelector('.config-title').textContent = '⚠️ No se pudo conectar — usando datos demo';
+    document.getElementById('configBanner').querySelector('.config-sub').textContent =
+      'Verifica que el Excel esté compartido como "Cualquiera con el vínculo puede ver". Detalle: ' + err.message;
+    rawData = DEMO_DATA;
+  }
+
+  document.getElementById('filtersBar').style.display = 'flex';
+  hideLoading();
+  update();
+}
+
+function parseGraphResponse(json) {
+  // json.values es una matriz de filas, cada fila: [mes_label, bog_n, bog_c, bog_s, med, otro, total]
+  // Ignoramos la primera columna (nombre del mes) y la última (total calculado)
+  return (json.values || []).map((row, idx) => {
+    const vals = row.slice(1, 6).map(v => {
+      if (v === 'N/A' || v === '' || v === null) return 0;
+      return typeof v === 'number' ? v : parseFloat(v) || 0;
+    });
+    return [idx, ...vals];
+  });
+}
+
+function loadData() {
+  const url = document.getElementById('excelUrl')?.value;
+  if (url) connectExcel();
+  else { rawData = DEMO_DATA; update(); }
+}
+
+function reconnect() {
+  document.getElementById('configBanner').className = 'config-banner';
+  document.getElementById('configBanner').innerHTML = `
+    <div class="config-left">
+      <div class="config-icon">📁</div>
+      <div>
+        <div class="config-title">Conectar con Excel en OneDrive</div>
+        <div class="config-sub">Pega la URL pública del Excel</div>
+      </div>
+    </div>
+    <div class="config-right">
+      <input class="config-input" type="text" id="excelUrl" placeholder="https://politecnicocolombiano-my.sharepoint.com/...">
+      <button class="btn-connect" onclick="connectExcel()">Conectar</button>
+    </div>
+  `;
+}
+
+// ══════════════════════════════════════════════════════════════
+// FILTROS
+// ══════════════════════════════════════════════════════════════
+function getFiltered() {
+  const sede   = document.getElementById('selSede')?.value   || 'all';
+  const period = document.getElementById('selPeriod')?.value || 'all';
+  const meses  = period === 'all' ? rawData : rawData.filter(r => QUARTER[period]?.includes(r[0]));
+
+  const sedesActivas = CONFIG.sedes.map((s, i) => ({ ...s, colIdx: i + 1 }))
+    .filter(s => sede === 'all' || s.id === sede);
+
+  return { rows: meses, sedesActivas };
+}
+
+function resetFilters() {
+  ['selYear','selSede','selPeriod'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.selectedIndex = 0;
+  });
+  update();
+}
+
+// ══════════════════════════════════════════════════════════════
+// HELPERS
+// ══════════════════════════════════════════════════════════════
+const fmt  = v => v.toLocaleString('es-CO', {maximumFractionDigits:0});
+const fmtK = v => v >= 1000000 ? (v/1000000).toFixed(1)+'M' : v >= 1000 ? (v/1000).toFixed(1)+'k' : fmt(v);
+
+function destroyChart(id) { if (charts[id]) { charts[id].destroy(); delete charts[id]; } }
+
+const CHART_DEFAULTS = {
+  responsive:true, maintainAspectRatio:false,
+  plugins:{
+    legend:{ labels:{ color:'#7b8aaa', font:{family:"'DM Sans'",size:11}, boxWidth:10, padding:12 } },
+    tooltip:{
+      backgroundColor:'#101828', borderColor:'rgba(245,166,35,0.25)',
+      borderWidth:1, titleColor:'#f5a623', bodyColor:'#e8edf5', padding:10,
+    }
+  },
+  scales:{
+    x:{ ticks:{color:'#4a556e',font:{size:10}}, grid:{color:'rgba(255,255,255,0.03)'} },
+    y:{ ticks:{color:'#4a556e',callback:v=>fmtK(v),font:{size:10}}, grid:{color:'rgba(255,255,255,0.04)'} }
+  }
+};
+
+function heatColor(v, min, max) {
+  const t = max === min ? 0 : (v - min) / (max - min);
+  const r = Math.round(10 + t * 245);
+  const g = Math.round(100 + t * 60);
+  const b = Math.round(200 - t * 165);
+  return `rgba(${r},${g},${b},${0.2 + t * 0.65})`;
+}
+
+// ══════════════════════════════════════════════════════════════
+// RENDERS
+// ══════════════════════════════════════════════════════════════
+function renderKPIs({ rows, sedesActivas }) {
+  const dataRows = rows.filter(r => sedesActivas.some(s => r[s.colIdx] > 0));
+  const total    = sedesActivas.reduce((s, se) => s + rows.reduce((a, r) => a + r[se.colIdx], 0), 0);
+  const meta     = CONFIG.metaAnual;
+  const pct      = meta > 0 ? (total / meta * 100) : 0;
+  const avg      = dataRows.length > 0 ? total / dataRows.length : 0;
+  const bySedeTotal = sedesActivas.map(s => ({ label: s.label, total: rows.reduce((a, r) => a + r[s.colIdx], 0) }));
+  const topSede  = bySedeTotal.sort((a, b) => b.total - a.total)[0]?.label || '—';
+
+  const pctClass = pct <= 80 ? 'ok' : pct <= 100 ? 'warn' : 'bad';
+  const pctMsg   = pct <= 80 ? '↓ Por debajo de la meta (favorable)' : pct <= 100 ? '↗ Cercano a la meta' : '↑ Superó la meta';
+
+  document.getElementById('kpisRow').innerHTML = `
+    <div class="kpi">
+      <div class="kpi-icon">⚡</div>
+      <div class="kpi-label">Total acumulado</div>
+      <div class="kpi-value">${fmtK(total)} <span>kWh</span></div>
+      <div class="kpi-sub">${dataRows.length} meses con dato</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-icon">🎯</div>
+      <div class="kpi-label">Meta anual</div>
+      <div class="kpi-value">${fmtK(meta)} <span>kWh</span></div>
+      <div class="kpi-sub">Configurada en Excel</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-icon">📊</div>
+      <div class="kpi-label">% vs meta</div>
+      <div class="kpi-value" style="color:${pct<=100?'var(--green)':'var(--red)'}">${pct.toFixed(1)}<span>%</span></div>
+      <div class="kpi-sub ${pctClass}">${pctMsg}</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-icon">📅</div>
+      <div class="kpi-label">Promedio mensual</div>
+      <div class="kpi-value">${fmtK(Math.round(avg))} <span>kWh</span></div>
+      <div class="kpi-sub">${dataRows.length} meses activos</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-icon">🏢</div>
+      <div class="kpi-label">Mayor consumidor</div>
+      <div class="kpi-value" style="font-size:13px;line-height:1.3">${topSede}</div>
+      <div class="kpi-sub">sede con más consumo</div>
+    </div>
+  `;
+}
+
+function renderLinea({ rows, sedesActivas }) {
+  destroyChart('linea');
+  const metaMensual = CONFIG.metaAnual / 12;
+  const ctx = document.getElementById('chartLinea').getContext('2d');
+  charts.linea = new Chart(ctx, {
+    type:'line',
+    data:{
+      labels: rows.map(r => MESES[r[0]]),
+      datasets:[
+        ...sedesActivas.map(s => ({
+          label: s.label, data: rows.map(r => r[s.colIdx] || null),
+          borderColor: s.color, backgroundColor: s.color+'22',
+          borderWidth:2, pointRadius:4, pointHoverRadius:6,
+          fill:false, tension:.3, spanGaps:false,
+        })),
+        {
+          label:'Meta mensual', data: rows.map(() => metaMensual),
+          borderColor:'rgba(244,63,94,0.5)', borderDash:[5,4],
+          borderWidth:1.5, pointRadius:0, fill:false,
+        }
+      ]
+    },
+    options:{ ...CHART_DEFAULTS,
+      plugins:{ ...CHART_DEFAULTS.plugins,
+        tooltip:{ ...CHART_DEFAULTS.plugins.tooltip,
+          callbacks:{ label: ctx => ` ${ctx.dataset.label}: ${fmt(ctx.parsed.y)} kWh` }
+        }
+      }
+    }
+  });
+}
+
+function renderDonut({ rows, sedesActivas }) {
+  destroyChart('donut');
+  const totals = sedesActivas.map(s => ({ label: s.label.split('·')[0].trim(), v: rows.reduce((a,r)=>a+r[s.colIdx],0), c: s.color }));
+  const ctx = document.getElementById('chartDonut').getContext('2d');
+  charts.donut = new Chart(ctx, {
+    type:'doughnut',
+    data:{ labels: totals.map(t=>t.label), datasets:[{ data:totals.map(t=>t.v), backgroundColor:totals.map(t=>t.c+'bb'), borderColor:totals.map(t=>t.c), borderWidth:2, hoverOffset:8 }] },
+    options:{ responsive:true, maintainAspectRatio:false, cutout:'62%',
+      plugins:{
+        legend:{ position:'right', labels:{ color:'#7b8aaa', font:{family:"'DM Sans'",size:11}, boxWidth:10, padding:10 } },
+        tooltip:{ backgroundColor:'#101828', borderColor:'rgba(245,166,35,0.25)', borderWidth:1, titleColor:'#f5a623', bodyColor:'#e8edf5',
+          callbacks:{ label: ctx => { const sum=ctx.dataset.data.reduce((a,b)=>a+b,0); return ` ${ctx.label}: ${fmtK(ctx.parsed)} kWh (${(ctx.parsed/sum*100).toFixed(1)}%)`; } }
+        }
+      }
+    }
+  });
+}
+
+function renderBar({ rows, sedesActivas }) {
+  destroyChart('bar');
+  const sorted = sedesActivas.map(s => ({
+    label: s.label.length>20?s.label.slice(0,20)+'…':s.label,
+    total: rows.reduce((a,r)=>a+r[s.colIdx],0),
+    meta: s.meta * (rows.length / 12),
+    color: s.color,
+  })).sort((a,b)=>b.total-a.total);
+  const ctx = document.getElementById('chartBar').getContext('2d');
+  charts.bar = new Chart(ctx, {
+    type:'bar',
+    data:{
+      labels: sorted.map(s=>s.label),
+      datasets:[
+        { label:'Consumo real', data:sorted.map(s=>s.total), backgroundColor:sorted.map(s=>s.color+'bb'), borderColor:sorted.map(s=>s.color), borderWidth:1, borderRadius:4 },
+        { label:'Meta período', data:sorted.map(s=>s.meta), backgroundColor:'rgba(244,63,94,0.1)', borderColor:'rgba(244,63,94,0.4)', borderWidth:1, borderRadius:4 },
+      ]
+    },
+    options:{ ...CHART_DEFAULTS, indexAxis:'y',
+      interaction:{mode:'index',intersect:false},
+      plugins:{ ...CHART_DEFAULTS.plugins,
+        tooltip:{ ...CHART_DEFAULTS.plugins.tooltip,
+          callbacks:{ label: ctx => ` ${ctx.dataset.label}: ${fmt(ctx.parsed.x)} kWh` }
+        }
+      },
+      scales:{ x:CHART_DEFAULTS.scales.x, y:{ ticks:{color:'#4a556e',font:{size:11}}, grid:{color:'rgba(255,255,255,0.03)'} } }
+    }
+  });
+}
+
+function renderHeatmap({ rows, sedesActivas }) {
+  const allVals = sedesActivas.flatMap(s => rows.map(r => r[s.colIdx]));
+  const mn = Math.min(...allVals), mx = Math.max(...allVals);
+  let html = `<table class="hm-table"><thead><tr><th class="sede-th">Sede</th>${rows.map(r=>`<th>${MESES[r[0]]}</th>`).join('')}<th>Total</th></tr></thead><tbody>`;
+  sedesActivas.forEach(s => {
+    const total = rows.reduce((a,r)=>a+r[s.colIdx],0);
+    html += `<tr><td class="sede-name">${s.label}</td>`;
+    rows.forEach(r => { const v=r[s.colIdx]; html += `<td style="background:${heatColor(v,mn,mx)};color:#e8edf5" title="${MESES_FULL[r[0]]}: ${fmt(v)} kWh">${fmtK(v)}</td>`; });
+    html += `<td style="background:rgba(245,166,35,0.12);color:#f5a623;font-weight:600">${fmtK(total)}</td></tr>`;
+  });
+  html += `<tr><td class="sede-name" style="color:#f5a623;font-weight:600">TOTAL</td>`;
+  rows.forEach(r => { const t=sedesActivas.reduce((a,s)=>a+r[s.colIdx],0); html+=`<td style="background:rgba(245,166,35,0.06);color:#ffc85a;font-weight:600">${fmtK(t)}</td>`; });
+  const gt = sedesActivas.flatMap(s=>rows.map(r=>r[s.colIdx])).reduce((a,b)=>a+b,0);
+  html += `<td style="background:rgba(245,166,35,0.2);color:#f5a623;font-weight:700">${fmtK(gt)}</td></tr></tbody></table>`;
+  document.getElementById('heatmapWrap').innerHTML = html;
+}
+
+function renderTable({ rows, sedesActivas }) {
+  const cols = ['Mes', ...sedesActivas.map(s=>s.label.split('·')[0].trim()), 'Total', 'vs Meta'];
+  document.getElementById('tableHead').innerHTML = `<tr>${cols.map((c,i)=>`<th onclick="sortTable(${i})">${c}${sortCol===i?(sortAsc?' ↑':' ↓'):''}</th>`).join('')}</tr>`;
+  let tableRows = rows.map(r => {
+    const vals = sedesActivas.map(s => r[s.colIdx]);
+    const total = vals.reduce((a,b)=>a+b,0);
+    const metaPro = sedesActivas.reduce((a,s)=>a+s.meta,0) / 12;
+    const pct = (total / metaPro * 100).toFixed(1);
+    return { mes:r[0], vals, total, pct };
+  });
+  if(sortCol>0 && sortCol<=sedesActivas.length) {
+    tableRows.sort((a,b)=>sortAsc?a.vals[sortCol-1]-b.vals[sortCol-1]:b.vals[sortCol-1]-a.vals[sortCol-1]);
+  }
+  document.getElementById('tableBody').innerHTML = tableRows.map(r=>`
+    <tr>
+      <td>${MESES_FULL[r.mes]}</td>
+      ${r.vals.map(v=>`<td>${fmt(v)}</td>`).join('')}
+      <td><strong>${fmt(r.total)}</strong></td>
+      <td><span class="badge ${parseFloat(r.pct)>100?'over':parseFloat(r.pct)>80?'warn':'ok'}">${r.pct}%</span></td>
+    </tr>`).join('');
+  // Totals row
+  const aVals = sedesActivas.map(s=>rows.reduce((a,r)=>a+r[s.colIdx],0));
+  const gt = aVals.reduce((a,b)=>a+b,0);
+  const gPct = (gt/(CONFIG.metaAnual)*100).toFixed(1);
+  document.getElementById('tableBody').innerHTML += `<tr><td>ACUMULADO</td>${aVals.map(v=>`<td>${fmt(v)}</td>`).join('')}<td>${fmt(gt)}</td><td><span class="badge ${parseFloat(gPct)>100?'over':parseFloat(gPct)>80?'warn':'ok'}">${gPct}%</span></td></tr>`;
+}
+
+window.sortTable = function(col){
+  if(sortCol===col) sortAsc=!sortAsc; else {sortCol=col;sortAsc=true;} update();
+};
+
+function update(){
+  const f = getFiltered();
+  renderKPIs(f); renderLinea(f); renderDonut(f); renderBar(f); renderHeatmap(f); renderTable(f);
+}
+
+function exportCSV(){
+  const { rows, sedesActivas } = getFiltered();
+  const headers = ['Mes',...sedesActivas.map(s=>s.label),'Total','% Meta'];
+  const lines = [headers.join(',')];
+  rows.forEach(r => {
+    const vals = sedesActivas.map(s=>r[s.colIdx]);
+    const total = vals.reduce((a,b)=>a+b,0);
+    const mp = sedesActivas.reduce((a,s)=>a+s.meta,0)/12;
+    lines.push([MESES_FULL[r[0]],...vals,total,(total/mp*100).toFixed(1)+'%'].join(','));
+  });
+  const blob = new Blob(['\uFEFF'+lines.join('\n')],{type:'text/csv;charset=utf-8'});
+  const a = document.createElement('a'); a.href=URL.createObjectURL(blob);
+  a.download='energia_poli_2025.csv'; a.click();
+}
+
+function showLoading(msg){ document.getElementById('loadingText').textContent=msg; document.getElementById('loadingOverlay').classList.remove('hidden'); }
+function hideLoading(){ document.getElementById('loadingOverlay').classList.add('hidden'); }
+
+// INIT — carga con datos demo y muestra filtros
+document.getElementById('filtersBar').style.display = 'flex';
+hideLoading();
+update();
+</script>
+</body>
+</html>
